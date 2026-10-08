@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>CollaborativeTripPlanner</display-name>
+
+    <!-- ============================================================ -->
+    <!-- Welcome file                                                  -->
+    <!-- ============================================================ -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- ============================================================ -->
+    <!-- Session config: 30 phut timeout                               -->
+    <!-- ============================================================ -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- AuthFilter KHONG khai bao o day - da dung @WebFilter("/*") ngay
+         trong class filter.AuthFilter.java (Servlet 3.0+ tu quet). -->
+
+    <!-- CAC SERVLET (Login, Trip, Place, Recommendation, Itinerary, Expense...)
+         KHONG khai bao o day. Tat ca da dung @WebServlet("/url") ngay trong
+         class Java (Servlet 3.0+), container tu quet va dang ky. Khai bao
+         them trong web.xml se gay loi "duplicate mapping" khi deploy. -->
+
+    <!-- ============================================================ -->
+    <!-- ERROR PAGES (tach loi)                                         -->
+    <!--  - Chua dang nhap: AuthFilter tu redirect ve /login            -->
+    <!--  - 403 (da dang nhap nhung khong du quyen) -> denied.jsp       -->
+    <!--  - 404 / 500 / Exception                   -> error.jsp        -->
+    <!-- ============================================================ -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/views/denied.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/views/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/views/error.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/WEB-INF/views/error.jsp</location>
+    </error-page>
+
+</web-app>

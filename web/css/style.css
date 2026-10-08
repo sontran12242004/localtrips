@@ -1,0 +1,149 @@
+:root {
+    --brand-primary: #2f6f4f;
+    --brand-primary-dark: #234f39;
+    --brand-accent: #e08e3e;
+    --brand-bg: #f7f5f0;
+    --brand-surface: #ffffff;
+    --brand-border: #e2ddd2;
+    --brand-text: #2b2b28;
+    --brand-muted: #74716a;
+    --danger: #b3452c;
+    --success: #2f6f4f;
+}
+
+body {
+    background-color: var(--brand-bg);
+    color: var(--brand-text);
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ---------- Navbar ---------- */
+.app-navbar {
+    background-color: var(--brand-primary-dark) !important;
+}
+.app-navbar .navbar-brand {
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+.app-navbar .nav-link {
+    color: rgba(255,255,255,.85) !important;
+}
+.app-navbar .nav-link:hover {
+    color: #fff !important;
+}
+
+/* ---------- Card / surface ---------- */
+.app-card {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    border-radius: .5rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ---------- Badges ---------- */
+.badge-owner {
+    background-color: var(--brand-accent);
+    color: #fff;
+}
+.badge-member {
+    background-color: var(--brand-muted);
+    color: #fff;
+}
+
+/* ---------- Empty state ---------- */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--brand-muted);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: .5rem;
+}
+
+/* ---------- Alerts shortcuts ---------- */
+.msg-error {
+    color: var(--danger);
+    background: #fbeae5;
+    border: 1px solid #f0c9bd;
+    padding: .6rem 1rem;
+    border-radius: .35rem;
+    margin-bottom: 1rem;
+}
+.msg-success {
+    color: var(--success);
+    background: #e8f3ec;
+    border: 1px solid #c3e0cd;
+    padding: .6rem 1rem;
+    border-radius: .35rem;
+    margin-bottom: 1rem;
+}
+
+/* ---------- Recommendation score ---------- */
+.score-pill {
+    display: inline-block;
+    min-width: 3rem;
+    text-align: center;
+    padding: .15rem .6rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    background: var(--brand-primary);
+    color: #fff;
+}
+
+/* ---------- Settlement ---------- */
+.balance-positive { color: var(--success); font-weight: 600; }
+.balance-negative { color: var(--danger); font-weight: 600; }
+
+/* ---------- Buttons ---------- */
+.btn-brand {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #fff;
+}
+.btn-brand:hover {
+    background-color: var(--brand-primary-dark);
+    border-color: var(--brand-primary-dark);
+    color: #fff;
+}
+
+/* ---------- Category chips (Places filter) ---------- */
+.category-chip {
+    display: inline-block;
+    padding: .3rem .9rem;
+    border-radius: 1rem;
+    border: 1px solid var(--brand-border);
+    color: var(--brand-text);
+    text-decoration: none;
+    margin-right: .4rem;
+    margin-bottom: .4rem;
+}
+.category-chip.active {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #fff;
+}
+
+footer.app-footer {
+    color: var(--brand-muted);
+    font-size: .85rem;
+    padding: 1.5rem 0;
+    text-align: center;
+}
+.group-fund-option {    
+    padding: 14px 16px;
+    background-color: #eaf5ef;
+    border: 1px solid #8fc4a6;
+    border-left: 5px solid #26734d;
+    border-radius: 8px;
+}
+
+.group-fund-option .form-check-input {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.group-fund-option .form-check-label {
+    color: #174d35;
+}

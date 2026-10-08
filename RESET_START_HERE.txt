@@ -1,0 +1,35 @@
+LOCALTRIP RESET READY - ĐỌC TRƯỚC KHI CHẠY
+
+A. DATABASE
+1. Mở SQL Server Management Studio (SSMS) và kết nối đúng SQL Server mà DBContext dùng.
+2. Mở file sql/LocalTripDB_RESET.sql.
+3. Đọc cảnh báo ở đầu file: script sẽ DROP và tạo lại LocalTripDB. Sao lưu dữ liệu cũ nếu cần.
+4. Execute toàn bộ file. Cuối script sẽ hiện bảng thống kê số dòng của các bảng.
+5. Tài khoản test được giữ theo seed data của project:
+   - Admin: minh@localtrip.vn
+   - User: thanh@localtrip.vn
+   - Member: lananh@localtrip.vn / hoangnam@localtrip.vn
+   File seed ghi mật khẩu test là 123456; nếu đăng nhập không thành công, kiểm tra logic hash/password trong source trước khi sửa DB.
+
+B. NETBEANS
+1. Giải nén ZIP vào một thư mục dễ tìm, ví dụ C:\FPT\LocalTrip.
+2. NetBeans -> File -> Open Project -> chọn thư mục LocalTrip (thư mục có build.xml và nbproject).
+3. Kiểm tra web/WEB-INF/lib/sqljdbc4.jar có tồn tại.
+4. Mở src/java/dao/DBContext.java và kiểm tra URL/user/password trùng SQL Server máy bạn.
+   Hiện file dùng localhost:1433, database LocalTripDB, user sa, password 12345.
+5. Stop Tomcat. Xóa deployment cũ của LocalTrip và cache work/temp trong thư mục Tomcat nếu biết chính xác đường dẫn.
+6. Nhấn Clean and Build. Chỉ tiếp tục khi thấy BUILD SUCCESSFUL.
+7. Run project từ NetBeans.
+
+C. KIỂM THỬ
+1. Login.
+2. Mở danh sách Trips; database có trip demo 'LocalTrip Demo - TP.HCM' cho thanh@localtrip.vn.
+3. Mở chi tiết trip và thành viên.
+4. Mở Places/Recommendations.
+5. Mở Itinerary và thử Auto Itinerary.
+6. Sau đó thử Expenses, Settlement, Group Fund, Admin logs.
+
+GHI CHÚ
+- Bản ZIP đã bỏ build/dist cache để NetBeans biên dịch lại từ source.
+- Không đổi system role Users.role thành TRIP_OWNER/MEMBER; quyền owner/member theo Trips.owner_id và TripMembers.
+- SQL Server JDBC jar có trong web/WEB-INF/lib.
