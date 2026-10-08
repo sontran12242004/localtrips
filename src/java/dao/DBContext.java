@@ -10,27 +10,54 @@ public class DBContext {
     private static final String DEFAULT_URL =
         "jdbc:postgresql://localhost:5432/LocalTripDB";
 
-    private static String getJdbcUrl() {
-        String dbUrl = System.getenv("DATABASE_URL");
-        if (dbUrl != null && !dbUrl.trim().isEmpty()) {
-            dbUrl = dbUrl.trim();
-            // Convert postgres:// or postgresql:// to jdbc:postgresql://
-            if (dbUrl.startsWith("postgres://")) {
-                dbUrl = "jdbc:postgresql://" + dbUrl.substring("postgres://".length());
-            } else if (dbUrl.startsWith("postgresql://")) {
-                dbUrl = "jdbc:postgresql://" + dbUrl.substring("postgresql://".length());
-            } else if (!dbUrl.startsWith("jdbc:postgresql://")) {
-                dbUrl = "jdbc:postgresql://" + dbUrl;
+    public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("PostgreSQL JDBC Driver not found.", e);
+        }
+
+        String rawUrl = System.getenv("DATABASE_URL");
+        if (rawUrl == null || rawUrl.trim().isEmpty()) {
+            rawUrl = System.getenv("DB_URL");
+        }
+
+        if (rawUrl != null && !rawUrl.trim().isEmpty()) {
+            rawUrl = rawUrl.trim();
+            try {
+                // Remove jdbc: prefix temporarily if present so URI can parse it
+                String uriStr = rawUrl;
+                if (uriStr.startsWith("jdbc:")) {
+                    uriStr = uriStr.substring("jdbc:".length());
+                }
+                if (uriStr.startsWith("postgres://") || uriStr.startsWith("postgresql://")) {
+                    java.net.URI uri = new java.net.URI(uriStr);
+                    String host = uri.getHost();
+                    int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+                    String path = uri.getPath(); // /railway
+                    String cleanJdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
+
+                    String user = getUser();
+                    String password = getPassword();
+
+                    if (uri.getUserInfo() != null) {
+                        String[] userInfo = uri.getUserInfo().split(":", 2);
+                        user = userInfo[0];
+                        if (userInfo.length > 1) {
+                            password = userInfo[1];
+                        }
+                    }
+
+                    return DriverManager.getConnection(cleanJdbcUrl, user, password);
+                }
+            } catch (Exception ignored) {
+                // Fallback to direct connection if URI parse fails
             }
-            return dbUrl;
+
+            return DriverManager.getConnection(rawUrl, getUser(), getPassword());
         }
 
-        String customUrl = System.getenv("DB_URL");
-        if (customUrl != null && !customUrl.trim().isEmpty()) {
-            return customUrl.trim();
-        }
-
-        return DEFAULT_URL;
+        return DriverManager.getConnection(DEFAULT_URL, getUser(), getPassword());
     }
 
     private static String getUser() {
@@ -53,18 +80,6 @@ public class DBContext {
             pass = System.getenv("POSTGRES_PASSWORD");
         }
         return pass != null ? pass : "postgres";
-    }
-
-    public static Connection getConnection() throws SQLException {
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("PostgreSQL JDBC Driver not found.", e);
-        }
-
-        String jdbcUrl = getJdbcUrl();
-        // If DATABASE_URL includes user:pass embedded in standard URI format, DriverManager will handle or fallback
-        return DriverManager.getConnection(jdbcUrl, getUser(), getPassword());
     }
 
     public static void close(AutoCloseable... resources) {
