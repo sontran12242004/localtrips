@@ -226,7 +226,7 @@ public class UserDAO {
          */
         sql.append(
                 "ORDER BY created_at DESC, user_id DESC "
-                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
+                + "LIMIT ? OFFSET ?"
         );
 
         List<User> users = new ArrayList<User>();
@@ -248,8 +248,8 @@ public class UserDAO {
                 ps.setString(index++, cleanRole);
             }
 
-            ps.setLong(index++, offset);
-            ps.setInt(index, pageSize);
+            ps.setInt(index++, pageSize);
+            ps.setLong(index, offset);
 
             try ( ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -324,7 +324,7 @@ public class UserDAO {
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601) {
+            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601 || "23505".equals(e.getSQLState())) {
                 return false;
             }
             throw new RuntimeException("Khong the tao user", e);
@@ -352,8 +352,8 @@ public class UserDAO {
             return ps.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            // SQL Server: email vi phạm UNIQUE constraint.
-            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601) {
+            // SQL Server: 2627/2601, PostgreSQL: 23505
+            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601 || "23505".equals(e.getSQLState())) {
                 return false;
             }
 
@@ -403,7 +403,7 @@ public class UserDAO {
             return ps.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601) {
+            if (e.getErrorCode() == 2627 || e.getErrorCode() == 2601 || "23505".equals(e.getSQLState())) {
                 return false;
             }
 

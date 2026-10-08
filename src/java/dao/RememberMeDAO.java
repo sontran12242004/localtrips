@@ -28,7 +28,7 @@ public class RememberMeDAO {
                 + "u.role, u.is_active, u.created_at "
                 + "FROM RememberMeTokens r "
                 + "JOIN Users u ON u.user_id = r.user_id "
-                + "WHERE r.token_hash = ? AND r.expires_at > SYSDATETIME() "
+                + "WHERE r.token_hash = ? AND r.expires_at > CURRENT_TIMESTAMP "
                 + "AND u.is_active = 1";
         try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {

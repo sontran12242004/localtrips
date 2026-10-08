@@ -68,11 +68,11 @@ public class LoginLogDAO {
         appendFilters(sql, parameters, emailKeyword, result, fromDate, toDate);
 
         sql.append("ORDER BY attempted_at DESC, login_log_id DESC ");
-        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        sql.append("LIMIT ? OFFSET ?");
 
         int offset = Math.max(0, page - 1) * Math.max(1, pageSize);
-        parameters.add(offset);
         parameters.add(Math.max(1, pageSize));
+        parameters.add(offset);
 
         try (Connection connection = DBContext.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql.toString())) {
@@ -110,23 +110,25 @@ public class LoginLogDAO {
     }
 
     public int countRecentFailures(String email, int minutes) {
+        long cutoffMillis = System.currentTimeMillis() - ((long) Math.max(1, minutes) * 60 * 1000);
+        java.sql.Timestamp cutoff = new java.sql.Timestamp(cutoffMillis);
 
         String sql = "SELECT COUNT(*) "
                 + "FROM LoginLogs "
                 + "WHERE email = ? "
-                + "AND success = 0 "
+                + "AND success = false "
                 + "AND failure_reason = 'INVALID_CREDENTIALS' "
-                + "AND attempted_at >= DATEADD(MINUTE, ?, SYSDATETIME()) "
-                + "AND attempted_at > ISNULL((" 
+                + "AND attempted_at >= ? "
+                + "AND attempted_at > COALESCE((" 
                 + "SELECT MAX(attempted_at) FROM LoginLogs "
-                + "WHERE email = ? AND success = 1" 
-                + "), CAST('1900-01-01' AS DATETIME2))";
+                + "WHERE email = ? AND success = true" 
+                + "), '1970-01-01'::timestamp)";
 
         try (Connection connection = DBContext.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, email);
-            statement.setInt(2, -Math.max(1, minutes));
+            statement.setTimestamp(2, cutoff);
             statement.setString(3, email);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -163,8 +165,11 @@ public class LoginLogDAO {
         }
 
         if (toDate != null) {
-            sql.append("AND attempted_at < DATEADD(DAY, 1, ?) ");
-            parameters.add(toDate);
+            // Add 1 day in Java to avoid vendor-specific DATEADD
+            long nextDayMillis = toDate.getTime() + (24L * 60 * 60 * 1000);
+            Date nextDay = new Date(nextDayMillis);
+            sql.append("AND attempted_at < ? ");
+            parameters.add(nextDay);
         }
     }
 

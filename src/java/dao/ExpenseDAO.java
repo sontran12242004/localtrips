@@ -361,15 +361,14 @@ public class ExpenseDAO {
                 + "WHERE trip_id = ? AND user_id = ?";
 
         String updateExpenseSql
-                = "UPDATE e "
+                = "UPDATE Expenses "
                 + "SET payer_id = ?, description = ?, "
                 + "amount = ?, from_group_fund = ? "
-                + "FROM Expenses e "
-                + "WHERE e.expense_id = ? "
-                + "AND e.trip_id = ? "
-                + "AND (e.created_by = ? OR EXISTS ("
+                + "WHERE expense_id = ? "
+                + "AND trip_id = ? "
+                + "AND (created_by = ? OR EXISTS ("
                 + "    SELECT 1 FROM Trips t "
-                + "    WHERE t.trip_id = e.trip_id "
+                + "    WHERE t.trip_id = Expenses.trip_id "
                 + "    AND t.owner_id = ?"
                 + "))";
 
@@ -456,29 +455,25 @@ public class ExpenseDAO {
             int tripId,
             int currentUserId
     ) {
-        String authorizationCondition
-                = "e.expense_id = ? "
-                + "AND e.trip_id = ? "
-                + "AND ("
-                + "e.created_by = ? "
-                + "OR EXISTS ("
-                + "SELECT 1 FROM Trips t "
-                + "WHERE t.trip_id = e.trip_id "
-                + "AND t.owner_id = ?"
-                + ")"
+        String deleteParticipantsSql
+                = "DELETE FROM ExpenseParticipants ep "
+                + "WHERE ep.expense_id = ? "
+                + "AND EXISTS ("
+                + "    SELECT 1 FROM Expenses e "
+                + "    WHERE e.expense_id = ep.expense_id "
+                + "    AND e.trip_id = ? "
+                + "    AND (e.created_by = ? OR EXISTS ("
+                + "        SELECT 1 FROM Trips t WHERE t.trip_id = e.trip_id AND t.owner_id = ?"
+                + "    ))"
                 + ")";
 
-        String deleteParticipantsSql
-                = "DELETE ep "
-                + "FROM ExpenseParticipants ep "
-                + "INNER JOIN Expenses e "
-                + "ON e.expense_id = ep.expense_id "
-                + "WHERE " + authorizationCondition;
-
         String deleteExpenseSql
-                = "DELETE e "
-                + "FROM Expenses e "
-                + "WHERE " + authorizationCondition;
+                = "DELETE FROM Expenses e "
+                + "WHERE e.expense_id = ? "
+                + "AND e.trip_id = ? "
+                + "AND (e.created_by = ? OR EXISTS ("
+                + "    SELECT 1 FROM Trips t WHERE t.trip_id = e.trip_id AND t.owner_id = ?"
+                + "))";
 
         try ( Connection connection = DBContext.getConnection()) {
 

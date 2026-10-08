@@ -6,27 +6,65 @@ import java.sql.SQLException;
 
 public class DBContext {
 
-    // Tren server (Render) doc tu bien moi truong; chay local thi dung gia tri mac dinh.
-    private static final String URL = env("DB_URL",
-        "jdbc:sqlserver://localhost:1433;databaseName=LocalTripDB;encrypt=false;trustServerCertificate=true");
+    // Support both Railway (DATABASE_URL) and standard env vars or local PostgreSQL
+    private static final String DEFAULT_URL =
+        "jdbc:postgresql://localhost:5432/LocalTripDB";
 
-    private static final String USER = env("DB_USER", "sa");
-    private static final String PASSWORD = env("DB_PASSWORD", "12345");
+    private static String getJdbcUrl() {
+        String dbUrl = System.getenv("DATABASE_URL");
+        if (dbUrl != null && !dbUrl.trim().isEmpty()) {
+            dbUrl = dbUrl.trim();
+            // Convert postgres:// or postgresql:// to jdbc:postgresql://
+            if (dbUrl.startsWith("postgres://")) {
+                dbUrl = "jdbc:postgresql://" + dbUrl.substring("postgres://".length());
+            } else if (dbUrl.startsWith("postgresql://")) {
+                dbUrl = "jdbc:postgresql://" + dbUrl.substring("postgresql://".length());
+            } else if (!dbUrl.startsWith("jdbc:postgresql://")) {
+                dbUrl = "jdbc:postgresql://" + dbUrl;
+            }
+            return dbUrl;
+        }
 
-    private static String env(String key, String defaultValue) {
-        String value = System.getenv(key);
-        return (value == null || value.trim().isEmpty()) ? defaultValue : value.trim();
+        String customUrl = System.getenv("DB_URL");
+        if (customUrl != null && !customUrl.trim().isEmpty()) {
+            return customUrl.trim();
+        }
+
+        return DEFAULT_URL;
+    }
+
+    private static String getUser() {
+        String user = System.getenv("DB_USER");
+        if (user == null || user.trim().isEmpty()) {
+            user = System.getenv("PGUSER");
+        }
+        if (user == null || user.trim().isEmpty()) {
+            user = System.getenv("POSTGRES_USER");
+        }
+        return (user != null && !user.trim().isEmpty()) ? user.trim() : "postgres";
+    }
+
+    private static String getPassword() {
+        String pass = System.getenv("DB_PASSWORD");
+        if (pass == null) {
+            pass = System.getenv("PGPASSWORD");
+        }
+        if (pass == null) {
+            pass = System.getenv("POSTGRES_PASSWORD");
+        }
+        return pass != null ? pass : "postgres";
     }
 
     public static Connection getConnection() throws SQLException {
-
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            throw new SQLException("SQL Server JDBC Driver not found.", e);
+            throw new SQLException("PostgreSQL JDBC Driver not found.", e);
         }
 
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        String jdbcUrl = getJdbcUrl();
+        // If DATABASE_URL includes user:pass embedded in standard URI format, DriverManager will handle or fallback
+        return DriverManager.getConnection(jdbcUrl, getUser(), getPassword());
     }
 
     public static void close(AutoCloseable... resources) {

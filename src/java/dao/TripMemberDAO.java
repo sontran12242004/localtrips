@@ -134,10 +134,10 @@ public class TripMemberDAO {
             int ownerId) {
 
         String sql
-                = "DELETE tm FROM TripMembers tm "
-                + "WHERE tm.trip_id = ? "
-                + "AND tm.user_id = ? "
-                + "AND tm.member_role = 'MEMBER' "
+                = "DELETE FROM TripMembers "
+                + "WHERE trip_id = ? "
+                + "AND user_id = ? "
+                + "AND member_role = 'MEMBER' "
                 + "AND EXISTS ("
                 + "    SELECT 1 FROM Trips t "
                 + "    WHERE t.trip_id = tm.trip_id "

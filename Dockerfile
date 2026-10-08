@@ -5,12 +5,14 @@ WORKDIR /app
 COPY src ./src
 COPY web ./web
 
-# Driver SQL Server moi (sqljdbc4.jar cu khong ho tro TLS 1.2 cua cloud DB)
+# Driver PostgreSQL + MSSQL (de ho tro ca hai neu can)
+ADD https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar /tmp/postgresql.jar
 ADD https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.8.1.jre11/mssql-jdbc-12.8.1.jre11.jar /tmp/mssql-jdbc.jar
 
 RUN mkdir -p out \
  && cp -r web/. out/ \
  && rm -f out/WEB-INF/lib/sqljdbc4.jar out/META-INF/context.xml \
+ && cp /tmp/postgresql.jar out/WEB-INF/lib/ \
  && cp /tmp/mssql-jdbc.jar out/WEB-INF/lib/ \
  && mkdir -p out/WEB-INF/classes \
  && find src/java -name "*.java" > sources.txt \

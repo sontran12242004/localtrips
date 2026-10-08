@@ -31,7 +31,7 @@ public class PasswordResetDAO {
     public User findUserByValidToken(String tokenHash) {
         String sql = "SELECT u.user_id, u.full_name, u.email, u.role, u.is_active, u.created_at "
                 + "FROM PasswordResetTokens p JOIN Users u ON u.user_id = p.user_id "
-                + "WHERE p.token_hash = ? AND p.expires_at > SYSDATETIME() "
+                + "WHERE p.token_hash = ? AND p.expires_at > CURRENT_TIMESTAMP "
                 + "AND p.used_at IS NULL AND u.is_active = 1";
         try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -54,9 +54,9 @@ public class PasswordResetDAO {
 
     public boolean resetPassword(String tokenHash, String newPasswordHash) {
         String select = "SELECT user_id FROM PasswordResetTokens "
-                + "WHERE token_hash = ? AND expires_at > SYSDATETIME() AND used_at IS NULL";
+                + "WHERE token_hash = ? AND expires_at > CURRENT_TIMESTAMP AND used_at IS NULL";
         String updateUser = "UPDATE Users SET password_hash = ? WHERE user_id = ? AND is_active = 1";
-        String consume = "UPDATE PasswordResetTokens SET used_at = SYSDATETIME() "
+        String consume = "UPDATE PasswordResetTokens SET used_at = CURRENT_TIMESTAMP "
                 + "WHERE token_hash = ? AND used_at IS NULL";
 
         try (Connection con = DBContext.getConnection()) {

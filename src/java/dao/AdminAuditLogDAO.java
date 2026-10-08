@@ -81,10 +81,10 @@ public class AdminAuditLogDAO {
         List<Object> params = new ArrayList<Object>();
         appendFilters(sql, params, keyword, action);
         sql.append("ORDER BY l.created_at DESC, l.audit_id DESC ")
-           .append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+           .append("LIMIT ? OFFSET ?");
 
-        params.add((page - 1) * pageSize);
         params.add(pageSize);
+        params.add((page - 1) * pageSize);
 
         List<AdminAuditLog> logs = new ArrayList<AdminAuditLog>();
         try (Connection con = DBContext.getConnection();

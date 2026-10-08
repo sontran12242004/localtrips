@@ -43,19 +43,20 @@ public class DashboardDAO {
 
     public List<Trip> findRecentTrips(int userId, int limit) {
         String sql =
-                "SELECT TOP (?) t.trip_id, t.owner_id, t.trip_name, t.destination, " +
+                "SELECT t.trip_id, t.owner_id, t.trip_name, t.destination, " +
                 "t.start_date, t.end_date, t.budget, t.description, t.status, t.created_at " +
                 "FROM Trips t " +
                 "WHERE t.owner_id = ? OR EXISTS " +
                 "(SELECT 1 FROM TripMembers tm WHERE tm.trip_id = t.trip_id AND tm.user_id = ?) " +
-                "ORDER BY t.created_at DESC, t.trip_id DESC";
+                "ORDER BY t.created_at DESC, t.trip_id DESC " +
+                "LIMIT ?";
 
         List<Trip> trips = new ArrayList<Trip>();
         try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, limit);
+            ps.setInt(1, userId);
             ps.setInt(2, userId);
-            ps.setInt(3, userId);
+            ps.setInt(3, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) trips.add(mapTrip(rs));
             }
